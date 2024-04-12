@@ -1,0 +1,8 @@
+source "/home/joagz/esp-idf/components/bootloader/Kconfig.projbuild"
+source "/home/joagz/esp-idf/components/esp_app_format/Kconfig.projbuild"
+source "/home/joagz/esp-idf/components/esp_rom/Kconfig.projbuild"
+source "/home/joagz/esp-idf/components/esptool_py/Kconfig.projbuild"
+source "/home/joagz/esp-idf/components/partition_table/Kconfig.projbuild"
+source "/home/joagz/esp-idf/esp32-arduino-lib-builder/components/arduino_tinyusb/Kconfig.projbuild"
+source "/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/Kconfig.projbuild"
+source "/home/joagz/esp-idf/projects/fingerprint-esp32-lib/managed_components/espressif__esp_rainmaker/Kconfig.projbuild"

@@ -1,0 +1,2 @@
+/home/joagz/.espressif/tools/xtensa-esp32-elf/esp-12.2.0_20230208/xtensa-esp32-elf/bin/xtensa-esp32-elf-ar qc libespressif__json_parser.a CMakeFiles/__idf_espressif__json_parser.dir/src/json_parser.c.obj
+/home/joagz/.espressif/tools/xtensa-esp32-elf/esp-12.2.0_20230208/xtensa-esp32-elf/bin/xtensa-esp32-elf-ranlib libespressif__json_parser.a

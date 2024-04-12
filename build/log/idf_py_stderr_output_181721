@@ -1,0 +1,35 @@
+Compiler supported targets: xtensa-esp32-elf
+
+ESP Insights Project commit: 469afde-dirty
+ESP RainMaker Project commit: 469afde-dirty
+Compiler supported targets: xtensa-esp32-elf
+
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp: In member function 'bool ETHClass::beginSPI(eth_phy_type_t, int32_t, int, int, int, SPIClass*, int, int, int, spi_host_device_t, uint8_t)':
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp:531:22: warning: unused variable 'eth_mac_config' [-Wunused-variable]
+  531 |     eth_mac_config_t eth_mac_config = ETH_MAC_DEFAULT_CONFIG();
+      |                      ^~~~~~~~~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp:532:22: warning: variable 'phy_config' set but not used [-Wunused-but-set-variable]
+  532 |     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
+      |                      ^~~~~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp: At global scope:
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp:331:18: warning: 'esp_err_t _eth_spi_deinit(void*)' defined but not used [-Wunused-function]
+  331 | static esp_err_t _eth_spi_deinit(void *ctx){
+      |                  ^~~~~~~~~~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/Ethernet/src/ETH.cpp:327:14: warning: 'void* _eth_spi_init(const void*)' defined but not used [-Wunused-function]
+  327 | static void *_eth_spi_init(const void *ctx){
+      |              ^~~~~~~~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/NetworkClientSecure/src/ssl_client.cpp:23:4: warning: #warning "Please call `idf.py menuconfig` then go to Component config -> mbedTLS -> TLS Key Exchange Methods -> Enable pre-shared-key ciphersuites and then check `Enable PSK based cyphersuite modes`. Save and Quit." [-Wcpp]
+   23 | #  warning "Please call `idf.py menuconfig` then go to Component config -> mbedTLS -> TLS Key Exchange Methods -> Enable pre-shared-key ciphersuites and then check `Enable PSK based cyphersuite modes`. Save and Quit."
+      |    ^~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/WiFi/src/WiFiGeneric.cpp: In member function 'bool WiFiGenericClass::initiateFTM(uint8_t, uint16_t, uint8_t, const uint8_t*)':
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/WiFi/src/WiFiGeneric.cpp:689:3: warning: missing initializer for member 'wifi_ftm_initiator_cfg_t::use_get_report_api' [-Wmissing-field-initializers]
+  689 |   };
+      |   ^
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/main/main.c: In function 'create_tcp_server':
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/main/main.c:318:17: warning: unused variable 'bytes_read' [-Wunused-variable]
+  318 |         ssize_t bytes_read = read(clientSock, readBuffer, BUF_SIZE);
+      |                 ^~~~~~~~~~
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/main/main.c: At top level:
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/main/main.c:45:20: warning: 'DISCONNECT_OP' defined but not used [-Wunused-variable]
+   45 | static const char *DISCONNECT_OP = "FIN";
+      |                    ^~~~~~~~~~~~~

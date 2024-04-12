@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/build/rmaker_claim_service_server.crt.S
+
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/build/rmaker_mqtt_server.crt.S
+
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/build/rmaker_ota_server.crt.S
+

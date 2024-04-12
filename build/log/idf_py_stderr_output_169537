@@ -1,0 +1,15 @@
+Compiler supported targets: xtensa-esp32-elf
+
+ESP Insights Project commit: 469afde-dirty
+ESP RainMaker Project commit: 469afde-dirty
+Compiler supported targets: xtensa-esp32-elf
+
+In file included from /home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/ArduinoOTA/src/ArduinoOTA.cpp:5:
+/home/joagz/esp-idf/projects/fingerprint-esp32-lib/components/arduino/libraries/ArduinoOTA/src/ArduinoOTA.h:4:10: fatal error: Network.h: No such file or directory
+    4 | #include "Network.h"
+      |          ^~~~~~~~~~~
+compilation terminated.
+make[2]: *** [esp-idf/arduino/CMakeFiles/__idf_arduino.dir/build.make:790: esp-idf/arduino/CMakeFiles/__idf_arduino.dir/libraries/ArduinoOTA/src/ArduinoOTA.cpp.obj] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [CMakeFiles/Makefile2:5360: esp-idf/arduino/CMakeFiles/__idf_arduino.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
