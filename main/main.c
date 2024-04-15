@@ -59,8 +59,8 @@ static const char *DISCONNECT_OP = "FIN";
 */
 static const char RECV_OK[] = { 0x01, 'R', 'E', 'C', 'V', 'O', 'K', 0x04, 0x00 };
 static const char RECV_BAD[] = { 0x01, 'R', 'E', 'C', 'V', 'B', 'A', 'D', 0x04, 0x00 };
-static const char SET_MODE_REGISTER[] = { 0x01, 'R', 'E', 'G', 'M', 'O', 'D', 'E', 0x04, 0x00 };
-static const char SET_MODE_AUTH[] = { 0x01, 'A', 'U', 'T', 'H', 'M', 'O', 'D', 'E', 0x04, 0x00 };
+static const char SET_MODE_REGISTER[] = { 0x01, 'R', 'E', 'G', 0x04, 0x00 };
+static const char SET_MODE_AUTH[] = { 0x01, 'A', 'U', 'T', 'H', 0x04, 0x00 };
 
 static const uint8_t RECB_SIZE = 10;
 static const uint8_t RECO_SIZE = 9;
@@ -255,8 +255,8 @@ void handle_client(int clientSock) {
         } else if(strcmp(SET_MODE_AUTH, data) == 0) {
 
         } else {
-            // throw communication
-            break;
+            send_err(clientSock);
+            continue;
         }
 
 
