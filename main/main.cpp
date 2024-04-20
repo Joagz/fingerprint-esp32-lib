@@ -17,6 +17,14 @@
 #include <unistd.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+// Al haber linkeado Arduino con ESPIDF podemos usar
+// las libs de Arduino, como Adafruit_Fingerprint.
+// Vamos a usarla en profundidad en el proyecto
+#include "Arduino.h"
+#include "Adafruit_Fingerprint.h"
+#include "HardwareSerial.h"
+
 #include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
@@ -31,13 +39,16 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 #include "sys/ioctl.h"
+#include "fingerprint_esp32.h"
 
-// Al haber linkeado Arduino con ESPIDF podemos usar
-// las libs de Arduino, como Adafruit_Fingerprint.
-// Vamos a usarla en profundidad en el proyecto
-#include <Adafruit_Fingerprint.h>
+
+#pragma region DEFINES
 
 /** DEFINICIONES **/
+static const RegisterRoutine registerRoutine;
+
+// Usamos los pines 16 y 17 en UART2 
+HardwareSerial SerialPort(2);
 
 #define WIFI_SUCCESS 1 << 0
 #define WIFI_FAILURE 1 << 1
@@ -47,7 +58,9 @@
 #define BUF_SIZE 512
 
 static const char *DEVICE_CODE = "ABC123";
-static const char *DISCONNECT_OP = "FIN";
+
+static const char *WIFI_SSID = "test";
+static const char *WIFI_PASS = "123";
 
 /*
     RESPUESTAS DEL SERVIDOR AL CLIENTE:
@@ -61,9 +74,11 @@ static const char RECV_OK[] = { 0x01, 'R', 'E', 'C', 'V', 'O', 'K', 0x04, 0x00 }
 static const char RECV_BAD[] = { 0x01, 'R', 'E', 'C', 'V', 'B', 'A', 'D', 0x04, 0x00 };
 static const char SET_MODE_REGISTER[] = { 0x01, 'R', 'E', 'G', 0x04, 0x00 };
 static const char SET_MODE_AUTH[] = { 0x01, 'A', 'U', 'T', 'H', 0x04, 0x00 };
+static const char DISCONNECT[] = { 0x01, 'F', 'I', 'N', 0x04, 0x00 };
 
 static const uint8_t RECB_SIZE = 10;
 static const uint8_t RECO_SIZE = 9;
+static const uint8_t DISCONNECT_SIZE = 6;
 
 static const char SOH = 0x01; /* "START OF HEAD" */
 static const char EOT = 0x04; /* "END OF TRANSMISSION "*/
@@ -83,7 +98,11 @@ static int s_retry_num = 0;
 static const char *TAG = "WIFI";
 static const char *SERVER_TAG = "SERVER_ESP32";
 
+#pragma endregion
+
 /** FUNCIONES **/
+
+#pragma region HANDLERS
 
 // Manejar eventos de WiFi
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
@@ -120,7 +139,11 @@ static void ip_event_handler(void* arg, esp_event_base_t event_base,
     }
 
 }
+#pragma endregion
 
+
+
+#pragma region WIFI
 // Conectarse a WIFI y obtener el resultado
 esp_err_t connect_wifi()
 {
@@ -162,17 +185,9 @@ esp_err_t connect_wifi()
                                                         &got_ip_event_instance));
 
     /** INICIAR EL DRIVER WIFI **/
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = "moto g23_1691",
-            .password = "cesar123",
-	     .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-            .pmf_cfg = {
-                .capable = true,
-                .required = false
-            },
-        },
-    };
+    wifi_config_t wifi_config;
+    sprintf (reinterpret_cast<char*>(wifi_config.sta.ssid), WIFI_SSID );
+    sprintf (reinterpret_cast<char*>(wifi_config.sta.password), WIFI_PASS);
 
     // Iniciar el modo a "station"
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
@@ -209,6 +224,12 @@ esp_err_t connect_wifi()
 
     return status;
 }
+
+#pragma endregion
+
+
+
+#pragma region HANDLE_CLIENT
 
 // Enviar error al cliente, (RECV_BAD)
 void send_err(int clientSock) {
@@ -251,12 +272,31 @@ void handle_client(int clientSock) {
 
         // Verificar el modo del cliente (REGISTER o AUTH)
         if(strcmp(SET_MODE_REGISTER, data) == 0) {
-
+            registerRoutine.setRegisterRoutine(true);
         } else if(strcmp(SET_MODE_AUTH, data) == 0) {
+            registerRoutine.setRegisterRoutine(false);
+        } else if(strcmp(DISCONNECT, data) == 0){
+            write(clientSock, DISCONNECT, DISCONNECT_SIZE); // Enviar al cliente que nos desconectaremos
+            close(clientSock);
+            return;
+        } 
+        else {
 
-        } else {
-            send_err(clientSock);
-            continue;
+            switch (registerRoutine.registerMode)
+            {
+                case true:
+                    // registrar una nueva huella
+
+                    break;
+                
+                default:
+
+                    // Manejar autenticacion
+
+                    break;
+            }
+
+            // Hacer algo con la huella
         }
 
 
@@ -264,14 +304,21 @@ void handle_client(int clientSock) {
 
         int bytes_write = write(clientSock, RECV_OK, RECO_SIZE);
 
-        if(bytes_write < 0)
+        if(bytes_write == -1)
         {
             perror("[ERRROR] al enviar RECV_OK, cliente probablemente desconectado");
+            send_err(clientSock);
         }
 
     }
 
 }
+
+#pragma endregion
+
+
+
+#pragma region TCP_SERVER
 
 // Crear servidor TCP y esperar conexiones
 esp_err_t create_tcp_server(void)
@@ -279,7 +326,7 @@ esp_err_t create_tcp_server(void)
     // Esta parte es default, no hace falta explicar
     /* CREAR SOCKET Y LANZAR EL SERVIDOR */
 
-    struct sockaddr_in serverInfo = {0};
+    struct sockaddr_in serverInfo;
 
 	serverInfo.sin_family = AF_INET;
 	serverInfo.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -314,13 +361,15 @@ esp_err_t create_tcp_server(void)
         // La constante BUF_SIZE determina cuantos datos admitiremos por buffer, y por lectura.
         // El cliente debe enviar una cantidad igual o menor ya que no necesitamos excederla.
 
-        struct sockaddr_in clientInfo = {0};
+        struct sockaddr_in clientInfo;
         socklen_t len = sizeof(clientInfo);
         int clientSock = accept(sock, (struct sockaddr*) &clientInfo, &len);
 
         char readBuffer[BUF_SIZE + 1] = {'\0'};
 
         ssize_t bytes_read = read(clientSock, readBuffer, BUF_SIZE);
+
+        if(bytes_read == -1) continue;
 
         // datos en crudo, removiendo SOH y EOT
         char data[BUF_SIZE-1] = {'\0'};
@@ -353,9 +402,33 @@ esp_err_t create_tcp_server(void)
     return TCP_SUCCESS;
 }
 
-void app_main(void)
+#pragma endregion
+
+
+
+#pragma region MAIN
+
+extern "C" void app_main()
 {
 	esp_err_t status = WIFI_FAILURE;
+
+    Adafruit_Fingerprint finger = Adafruit_Fingerprint(&SerialPort);
+    finger.begin(FINGERPRINT_BAUDRATE_115200);
+
+    if(finger.device_addr != 0xFFFFFFFF) {
+        ESP_LOGI("MAIN", "PASS. FINGERPRINT SENSOR (INICIADO CORRECTAMENTE)");
+    } else {
+        ESP_LOGE("MAIN", "ERROR! FINGERPRINT SENSOR (NO SE HA ENCONTRADO)");
+        // Hacer algo en caso de error
+    }
+
+    /*
+        TODO:
+
+        Hay que crear una rutina que espere a que un dedo sea colocado y una vez hecho,
+        envie los datos del sensor directamente hacia la PC conectada en el servidor.
+    
+    */
 
 	// Formatear el NVS (Non-Volatile Storage), requerido para conectarnos a WiFi.
     // Esta libreria es importante para guardar datos que necesitan
@@ -379,3 +452,5 @@ void app_main(void)
     create_tcp_server();
 
 }
+
+#pragma endregion
